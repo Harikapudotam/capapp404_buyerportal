@@ -1,0 +1,5 @@
+ItemNo,ItemDescr,Quantity,UnitPrice,RequestHeader_RequestNo,MaterialNum_MID
+1,"Item A",10,50.00,471dd4a2-3fb2-4ad5-89cb-1c6c06e4ab7a,10
+11,"Item B",5,200.00,471dd4a2-3fb2-4ad5-89cb-1c6c06e4ab7a,20
+2,"Item C",15,75.50,1e728968-251d-41bf-818e-cc18ac44ba62,30
+3,"Item D",20,100.00,5791a2af-eed6-4b0e-b9f5-141b7ded13ef,40

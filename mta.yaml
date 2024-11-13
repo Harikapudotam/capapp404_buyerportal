@@ -1,0 +1,159 @@
+_schema-version: 3.3.0
+ID: headerapp
+description: A simple CAP project.
+version: 1.0.0
+modules:
+- name: headerapp-srv
+  type: nodejs
+  path: gen/srv
+  requires:
+  - name: headerapp-destination
+  - name: headerapp-db
+  - name: uaa_headerapp
+  - name: headerapp-connectivity
+  provides:
+  - name: srv-api
+    properties:
+      srv-url: ${default-url}
+  parameters:
+    buildpack: nodejs_buildpack
+    readiness-health-check-http-endpoint: /health
+    readiness-health-check-type: http
+  build-parameters:
+    builder: npm
+- name: headerapp-db-deployer
+  type: hdb
+  path: gen/db
+  requires:
+  - name: headerapp-db
+  parameters:
+    buildpack: nodejs_buildpack
+- name: headerapp-destination-content
+  type: com.sap.application.content
+  requires:
+  - name: headerapp-destination
+    parameters:
+      content-target: true
+  - name: headerapp_html_repo_host
+    parameters:
+      service-key:
+        name: headerapp_html_repo_host-key
+  - name: uaa_headerapp
+    parameters:
+      service-key:
+        name: uaa_headerapp-key
+  parameters:
+    content:
+      instance:
+        destinations:
+        - Name: header_headerapp_html_repo_host
+          ServiceInstanceName: headerapp-html5-app-host-service
+          ServiceKeyName: headerapp_html_repo_host-key
+          sap.cloud.service: header
+        - Authentication: OAuth2UserTokenExchange
+          Name: header_uaa_headerapp
+          ServiceInstanceName: headerapp-xsuaa-service
+          ServiceKeyName: uaa_headerapp-key
+          sap.cloud.service: header
+        existing_destinations_policy: ignore
+  build-parameters:
+    no-source: true
+- name: headerapp-app-content
+  type: com.sap.application.content
+  path: .
+  requires:
+  - name: headerapp_html_repo_host
+    parameters:
+      content-target: true
+  build-parameters:
+    build-result: resources
+    requires:
+    - artifacts:
+      - myheaderapp.zip
+      name: myheaderapp
+      target-path: resources/
+    - artifacts:
+      - ustwebapp.zip
+      name: ustwebapp
+      target-path: resources/
+- name: myheaderapp
+  type: html5
+  path: app/webapp
+  build-parameters:
+    build-result: dist
+    builder: custom
+    commands:
+    - npm install
+    - npm run build:cf
+    supported-platforms: []
+- name: ustwebapp
+  type: html5
+  path: app/webapp
+  build-parameters:
+    build-result: dist
+    builder: custom
+    commands:
+    - npm install
+    - npm run build:cf
+    supported-platforms: []
+resources:
+- name: headerapp-destination
+  type: org.cloudfoundry.managed-service
+  parameters:
+    config:
+      HTML5Runtime_enabled: true
+      init_data:
+        instance:
+          destinations:
+          - Authentication: NoAuthentication
+            Name: ui5
+            ProxyType: Internet
+            Type: HTTP
+            URL: https://ui5.sap.com
+          - Authentication: NoAuthentication
+            HTML5.DynamicDestination: true
+            HTML5.ForwardAuthToken: true
+            Name: headerapp-srv-api
+            ProxyType: Internet
+            Type: HTTP
+            URL: ~{srv-api/srv-url}
+          existing_destinations_policy: update
+    service: destination
+    service-plan: lite
+  requires:
+  - name: srv-api
+- name: headerapp-db
+  type: com.sap.xs.hdi-container
+  parameters:
+    service: hana
+    service-plan: hdi-shared
+- name: headerapp_html_repo_host
+  type: org.cloudfoundry.managed-service
+  parameters:
+    service: html5-apps-repo
+    service-name: headerapp-html5-app-host-service
+    service-plan: app-host
+- name: uaa_headerapp
+  type: org.cloudfoundry.managed-service
+  parameters:
+    config:
+      tenant-mode: dedicated
+      xsappname: headerapp-${org}-${space}
+    path: ./xs-security.json
+    service: xsuaa
+    service-name: headerapp-xsuaa-service
+    service-plan: application
+- name: headerapp-connectivity
+  type: org.cloudfoundry.managed-service
+  parameters:
+    service: connectivity
+    service-plan: lite
+parameters:
+  deploy_mode: html5-repo
+  enable-parallel-deployments: true
+build-parameters:
+  before-all:
+  - builder: custom
+    commands:
+    - npm ci
+    - npx cds build --production

@@ -1,0 +1,181 @@
+{
+    "_version": "1.65.0",
+    "sap.app": {
+        "id": "ust.webapp",
+        "type": "application",
+        "i18n": "i18n/i18n.properties",
+        "applicationVersion": {
+            "version": "0.0.1"
+        },
+        "title": "{{appTitle}}",
+        "description": "{{appDescription}}",
+        "resources": "resources.json",
+        "sourceTemplate": {
+            "id": "@sap/generator-fiori:lrop",
+            "version": "1.15.4",
+            "toolsId": "3682feff-d03f-4315-975c-8860baf63398"
+        },
+        "dataSources": {
+            "mainService": {
+                "uri": "odata/v4/my/",
+                "type": "OData",
+                "settings": {
+                    "annotations": [],
+                    "odataVersion": "4.0"
+                }
+            }
+        },
+        "crossNavigation": {
+            "inbounds": {
+                "webapp-manage": {
+                    "semanticObject": "webapp",
+                    "action": "manage",
+                    "title": "{{flpTitle}}",
+                    "signature": {
+                        "parameters": {},
+                        "additionalParameters": "allowed"
+                    }
+                }
+            }
+        }
+    },
+    "sap.ui": {
+        "technology": "UI5",
+        "icons": {
+            "icon": "",
+            "favIcon": "",
+            "phone": "",
+            "phone@2": "",
+            "tablet": "",
+            "tablet@2": ""
+        },
+        "deviceTypes": {
+            "desktop": true,
+            "tablet": true,
+            "phone": true
+        }
+    },
+    "sap.ui5": {
+        "flexEnabled": true,
+        "dependencies": {
+            "minUI5Version": "1.130.0",
+            "libs": {
+                "sap.m": {},
+                "sap.ui.core": {},
+                "sap.fe.templates": {}
+            }
+        },
+        "contentDensities": {
+            "compact": true,
+            "cozy": true
+        },
+        "models": {
+            "i18n": {
+                "type": "sap.ui.model.resource.ResourceModel",
+                "settings": {
+                    "bundleName": "ust.webapp.i18n.i18n"
+                }
+            },
+            "": {
+                "dataSource": "mainService",
+                "preload": true,
+                "settings": {
+                    "operationMode": "Server",
+                    "autoExpandSelect": true,
+                    "earlyRequests": true
+                }
+            },
+            "@i18n": {
+                "type": "sap.ui.model.resource.ResourceModel",
+                "uri": "i18n/i18n.properties"
+            }
+        },
+        "resources": {
+            "css": []
+        },
+        "routing": {
+            "config": {},
+            "routes": [
+                {
+                    "pattern": ":?query:",
+                    "name": "Request_HeaderList",
+                    "target": "Request_HeaderList"
+                },
+                {
+                    "pattern": "Request_Header({key}):?query:",
+                    "name": "Request_HeaderObjectPage",
+                    "target": "Request_HeaderObjectPage"
+                },
+                {
+                    "pattern": "Request_Header({key})/items({key2}):?query:",
+                    "name": "Request_ItemsObjectPage",
+                    "target": "Request_ItemsObjectPage"
+                }
+            ],
+            "targets": {
+                "Request_HeaderList": {
+                    "type": "Component",
+                    "id": "Request_HeaderList",
+                    "name": "sap.fe.templates.ListReport",
+                    "options": {
+                        "settings": {
+                            "contextPath": "/Request_Header",
+                            "variantManagement": "Page",
+                            "navigation": {
+                                "Request_Header": {
+                                    "detail": {
+                                        "route": "Request_HeaderObjectPage"
+                                    }
+                                }
+                            },
+                            "controlConfiguration": {
+                                "@com.sap.vocabularies.UI.v1.LineItem": {
+                                    "tableSettings": {
+                                        "type": "ResponsiveTable"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "Request_HeaderObjectPage": {
+                    "type": "Component",
+                    "id": "Request_HeaderObjectPage",
+                    "name": "sap.fe.templates.ObjectPage",
+                    "options": {
+                        "settings": {
+                            "editableHeaderContent": false,
+                            "contextPath": "/Request_Header",
+                            "navigation": {
+                                "items": {
+                                    "detail": {
+                                        "route": "Request_ItemsObjectPage"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "Request_ItemsObjectPage": {
+                    "type": "Component",
+                    "id": "Request_ItemsObjectPage",
+                    "name": "sap.fe.templates.ObjectPage",
+                    "options": {
+                        "settings": {
+                            "editableHeaderContent": false,
+                            "contextPath": "/Request_Header/items"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "sap.fiori": {
+        "registrationIds": [],
+        "archeType": "transactional"
+    },
+    "sap.cloud": {
+        "public": true,
+        "service": "header"
+    }
+}

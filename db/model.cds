@@ -10,7 +10,7 @@ entity Status {
 }
 
 entity RequestHeader : managed{
-    key RequestNo : UUID @mandatory;
+    key RequestNo : Integer  @readonly;
     RequestDescr : String(40) @mandatory;
     Status       : Association to Status; // Association to Status entity
     // @semantics.TotalPrice.currencyCode : 'currency'

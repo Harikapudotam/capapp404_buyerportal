@@ -5,7 +5,7 @@ module.exports = cds.service.impl(async function (srv) {
     const prod_api = await cds.connect.to('OP_API_PRODUCT_SRV_0001');
     
     // Destructure the entities from the service
-    const { materials } = srv.entities;
+    const { materials ,Request_Header , REQUEST_HEADER_DRAFTS } = srv.entities;
     
     // Define the READ event for the 'materials' entity
     srv.on("READ", materials, async (req) => {
@@ -33,4 +33,15 @@ module.exports = cds.service.impl(async function (srv) {
             throw new Error("Failed to retrieve data from the external service.");
         }
     });
+    srv.before('CREATE', Request_Header, async (req) => {
+        const { maxNumber } = await SELECT.one`max(RequestNo) as maxNumber`.from(Request_Header)
+        let iNewNo = (!maxNumber ? 1000000000 : Number(maxNumber) + 1);
+        req.data.RequestNo = iNewNo;
+         // Increment for next request
+    });
+    srv.before('NEW',REQUEST_HEADER_DRAFTS,async(req)=>{
+        const { maxNumber } = await SELECT.one`max(RequestNo) as maxNumber`.from(Request_Header)
+        let iNewNo = (!maxNumber ? 1000000000 : Number(maxNumber) + 1);
+        req.data.RequestNo = iNewNo;
+    })
 });

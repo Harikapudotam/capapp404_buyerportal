@@ -8,7 +8,7 @@ annotate service.Request_Header @(
     UI.LineItem:[
         {
             $Type : 'UI.DataField',
-            Label : 'Request Number',
+            // Label : 'Request Number',
             Value : RequestNo,
         },
         
